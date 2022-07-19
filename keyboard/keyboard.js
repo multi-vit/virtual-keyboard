@@ -1,181 +1,236 @@
 const Keyboard = {
-    elements: {
-        main: null,
-        keysContainer: null,
-        keys: [],
-    },
+  elements: {
+    main: null,
+    keysContainer: null,
+    keys: [],
+  },
 
-    eventHandlers: {
-        oninput: null,
-        onclose: null,
-    },
+  eventHandlers: {
+    oninput: null,
+    onclose: null,
+  },
 
-    properties: {
-        value: "",
-        capsLock: false,
-    },
+  properties: {
+    value: "",
+    capsLock: false,
+  },
 
-    init() {
-        // Create main elements
-        this.elements.main = document.createElement("div");
-        this.elements.keysContainer = document.createElement("div");
+  init() {
+    // Create main elements
+    this.elements.main = document.createElement("div");
+    this.elements.keysContainer = document.createElement("div");
 
-        //Setup main elements
-        this.elements.main.classList.add("keyboard", "keyboard--hidden");
-        this.elements.keysContainer.classList.add("keyboard__keys");
-        this.elements.keysContainer.appendChild(this._createKeys());
+    //Setup main elements
+    this.elements.main.classList.add("keyboard", "keyboard--hidden");
+    this.elements.keysContainer.classList.add("keyboard__keys");
+    this.elements.keysContainer.appendChild(this._createKeys());
 
-        this.elements.keys = this.elements.keysContainer.querySelectorAll(".keyboard__key")
+    this.elements.keys =
+      this.elements.keysContainer.querySelectorAll(".keyboard__key");
 
-        // Add to DOM
-        this.elements.main.appendChild(this.elements.keysContainer);
-        document.body.appendChild(this.elements.main);
+    // Add to DOM
+    this.elements.main.appendChild(this.elements.keysContainer);
+    document.body.appendChild(this.elements.main);
 
-        // Automatically use the keyboard for elements with .use=keyboard-input
-        document.querySelectorAll(".use-keyboard-input").forEach(element => {
-            element.addEventListener("focus", () => {
-                this.open(element.value, currentValue => {
-                    element.value = currentValue;
-                });
-            });
+    // Automatically use the keyboard for elements with .use=keyboard-input (text area in html file in this case, but reusable for any element with the class)
+    document.querySelectorAll(".use-keyboard-input").forEach((element) => {
+      element.addEventListener("focus", () => {
+        this.open(element.value, (currentValue) => {
+          element.value = currentValue;
         });
-    },
+      });
+    });
+  },
 
-    _createKeys() {
-        const fragment = document.createDocumentFragment();
-        const keyLayout = [
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "backspace",
-            "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
-            "caps", "a", "s", "d", "f", "g", "h", "j", "k", "l", "enter",
-            "done", "z", "x", "c", "v", "b", "n", "m", ",", ".", "?",
-            "space",
-        ];
+  _createKeys() {
+    const fragment = document.createDocumentFragment();
+    const keyLayout = [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "0",
+      "backspace",
+      "q",
+      "w",
+      "e",
+      "r",
+      "t",
+      "y",
+      "u",
+      "i",
+      "o",
+      "p",
+      "caps",
+      "a",
+      "s",
+      "d",
+      "f",
+      "g",
+      "h",
+      "j",
+      "k",
+      "l",
+      "enter",
+      "done",
+      "z",
+      "x",
+      "c",
+      "v",
+      "b",
+      "n",
+      "m",
+      ",",
+      ".",
+      "?",
+      "space",
+    ];
 
-        // Creates HTML for an icon
-        function createIconHTML(icon_name) {
-            return `<i class="material-icons">${icon_name}</i>`;
-        };
+    // Creates HTML for an icon
+    function createIconHTML(icon_name) {
+      return `<i class="material-icons">${icon_name}</i>`;
+    }
 
-        // Loop through characters to generate HTML elements
-        keyLayout.forEach(key => {
-            const keyElement = document.createElement("button");
-            const insertLineBreak = ["backspace", "p", "enter", "?"].indexOf(key) !== -1;
+    // Loop through characters to generate HTML elements
+    keyLayout.forEach((key) => {
+      const keyElement = document.createElement("button");
+      //Check if key is at the end of the row and create a line break
+      const insertLineBreak =
+        ["backspace", "p", "enter", "?"].indexOf(key) !== -1;
 
-            // Add attributes/classes
-            keyElement.setAttribute("type", "button");
-            keyElement.classList.add("keyboard__key");
+      // Add attributes/classes
+      keyElement.setAttribute("type", "button");
+      keyElement.classList.add("keyboard__key");
 
-            // Using switch statement (if statement) for keys
-            switch (key) {
-                case "backspace":
-                    keyElement.classList.add("keyboard__key--wide");
-                    keyElement.innerHTML = createIconHTML ("backspace");
-                    // Removes the last character when clicked
-                    keyElement.addEventListener("click", () => {
-                        this.properties.value = this.properties.value.substring(0, this.properties.value.length - 1);
-                        this._triggerEvent("oninput");
-                    });
+      // Using switch statement (if statement) for keys
+      switch (key) {
+        case "backspace":
+          keyElement.classList.add("keyboard__key--wide");
+          keyElement.innerHTML = createIconHTML("backspace");
+          // Removes the last character when clicked
+          keyElement.addEventListener("click", () => {
+            this.properties.value = this.properties.value.substring(
+              0,
+              this.properties.value.length - 1
+            );
+            this._triggerEvent("oninput");
+          });
 
-                break;
-                
-                case "caps":
-                    keyElement.classList.add("keyboard__key--wide", "keyboard__key--activatable");
-                    keyElement.innerHTML = createIconHTML ("keyboard_capslock");
-                    // Add eventlistener to toggle caps lock
-                    keyElement.addEventListener("click", () => {
-                        this._toggleCapsLock();
-                        keyElement.classList.toggle("keyboard_key--active", this.properties.capsLock);                    
-                    });
+          break;
 
-                break;
+        case "caps":
+          keyElement.classList.add(
+            "keyboard__key--wide",
+            "keyboard__key--activatable"
+          );
+          keyElement.innerHTML = createIconHTML("keyboard_capslock");
+          // Add eventlistener to toggle caps lock
+          keyElement.addEventListener("click", () => {
+            this._toggleCapsLock();
+            // Toggles green light on or off depending on caps lock status
+            keyElement.classList.toggle(
+              "keyboard__key--active",
+              this.properties.capsLock
+            );
+          });
 
-                case "enter":
-                    keyElement.classList.add("keyboard__key--wide");
-                    keyElement.innerHTML = createIconHTML ("keyboard_return");
-                    // Add event listener to insert line break (\n) on click
-                    keyElement.addEventListener("click", () => {
-                        this.properties.value += "\n";
-                        this._triggerEvent("oninput");
-                    });
+          break;
 
-                break;
-                
-                case "space":
-                keyElement.classList.add("keyboard__key--extra-wide");
-                keyElement.innerHTML = createIconHTML ("space_bar");
-                // Add event listener to insert whitespace on click
-                keyElement.addEventListener("click", () => {
-                    this.properties.value += " ";
-                    this._triggerEvent("oninput");
-                });
+        case "enter":
+          keyElement.classList.add("keyboard__key--wide");
+          keyElement.innerHTML = createIconHTML("keyboard_return");
+          // Add event listener to insert line break (\n) on click
+          keyElement.addEventListener("click", () => {
+            this.properties.value += "\n";
+            this._triggerEvent("oninput");
+          });
 
-                break;
+          break;
 
-                case "done":
-                    keyElement.classList.add("keyboard__key--wide", "keyboard_key--dark");
-                    keyElement.innerHTML = createIconHTML ("check_circle");
-                    // Add event listener to insert line break (\n) on click
-                    keyElement.addEventListener("click", () => {
-                        this.close;
-                        this._triggerEvent("onclose");
-                    });
+        case "space":
+          keyElement.classList.add("keyboard__key--extra-wide");
+          keyElement.innerHTML = createIconHTML("space_bar");
+          // Add event listener to insert whitespace on click
+          keyElement.addEventListener("click", () => {
+            this.properties.value += " ";
+            this._triggerEvent("oninput");
+          });
 
-                break;
+          break;
 
-                default:
-                    keyElement.textContent = key.toLowerCase();
-                    keyElement.addEventListener("click", () => {
-                        this.properties.value += this.properties.capsLock ? key.toUpperCase() : key.toLowerCase();
-                        this._triggerEvent("oninput");
-                    });
-                break;
-            }
+        case "done":
+          keyElement.classList.add("keyboard__key--wide", "keyboard_key--dark");
+          keyElement.innerHTML = createIconHTML("check_circle");
+          // Add event listener to insert line break (\n) on click
+          keyElement.addEventListener("click", () => {
+            this.close();
+            this._triggerEvent("onclose");
+          });
 
-            fragment.appendChild(keyElement);
+          break;
 
-            if (insertLineBreak) {
-                fragment.appendChild(document.createElement("br"));
-            };
-        })
+        default:
+          keyElement.textContent = key.toLowerCase();
+          keyElement.addEventListener("click", () => {
+            this.properties.value += this.properties.capsLock
+              ? key.toUpperCase()
+              : key.toLowerCase();
+            this._triggerEvent("oninput");
+          });
+          break;
+      }
 
-        return fragment;
-    },
+      fragment.appendChild(keyElement);
 
-    _triggerEvent(handlerName) {
-        if (typeof this.eventHandlers[handlerName] == "function") {
-            this.eventHandlers[handlerName](this.properties.value);
-        };
-    },
+      if (insertLineBreak) {
+        fragment.appendChild(document.createElement("br"));
+      }
+    });
 
-    _toggleCapsLock() {
-        this.properties.capsLock = !this.properties.capsLock;
+    return fragment;
+  },
 
-        for(const key of this.elements.keys) {
-            if (key.childElementCount === 0) {
-                key.textContent = this.properties.capsLock ? key.textContent.toUpperCase() : key.textContent.toLowerCase();
-            };
-        };
-    },
+  _triggerEvent(handlerName) {
+    if (typeof this.eventHandlers[handlerName] == "function") {
+      this.eventHandlers[handlerName](this.properties.value);
+    }
+  },
 
-    open(initialValue, oninput, onclose) {
-        this.properties.value = initialValue || "";
-        this.eventHandlers.oninput = oninput;
-        this.eventHandlers.onclose = onclose;
-        this.elements.main.classList.remove("keyboard--hidden");
-    },
+  _toggleCapsLock() {
+    this.properties.capsLock = !this.properties.capsLock;
 
-    close() {
-        this.properties.value = "";
-        this.eventHandlers.oninput = oninput;
-        this.eventHandlers.onclose = onclose;
-        this.elements.main.classList.add("keyboard--hidden");
-    },
+    for (const key of this.elements.keys) {
+      if (key.childElementCount === 0) {
+        key.textContent = this.properties.capsLock
+          ? key.textContent.toUpperCase()
+          : key.textContent.toLowerCase();
+      }
+    }
+  },
+
+  open(initialValue, oninput, onclose) {
+    this.properties.value = initialValue || "";
+    this.eventHandlers.oninput = oninput;
+    this.eventHandlers.onclose = onclose;
+    this.elements.main.classList.remove("keyboard--hidden");
+  },
+
+  close() {
+    this.properties.value = "";
+    this.eventHandlers.oninput = oninput;
+    this.eventHandlers.onclose = onclose;
+    this.elements.main.classList.add("keyboard--hidden");
+  },
 };
 
-
 window.addEventListener("DOMContentLoaded", function () {
-    Keyboard.init();
-/*     Keyboard.open("dcode", function (currentValue) {
+  Keyboard.init();
+  /*     Keyboard.open("dcode", function (currentValue) {
         console.log(`value changed! Heree it is: ${currentValue}`);
     }, function (currentValue) {
         console.log(`keyboard closed! Finishing value: ${currentValue}`);
